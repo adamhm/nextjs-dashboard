@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
-import { UpdateInvoice } from "./buttons";
+import { updateInvoice } from "@/app/lib/actions";
 
 export default function EditInvoiceForm({
     invoice,
@@ -21,7 +21,7 @@ export default function EditInvoiceForm({
     // Passing an id as argument won't work
     // <form action={updateInvoice(id)}></form>
     // Instead, you can pass id to the Server Action using JS bind.
-    const updateInvoiceWithId = UpdateInvoice.bind(null, { id: invoice.id });
+    const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
 
     return (
         <form action={updateInvoiceWithId}>
