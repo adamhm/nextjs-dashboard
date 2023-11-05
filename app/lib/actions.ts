@@ -30,10 +30,14 @@ export async function createInvoice(formData: FormData) {
     const date = new Date().toISOString().split("T")[0];
 
     // insert the new invoice into the database
-    await sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-    `;
+    try {
+        await sql`
+            INSERT INTO invoices (customer_id, amount, status, date)
+            VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+        `;
+    } catch (err) {
+        return { message: "Database Error: Failed to Create Invoice." };
+    }
 
     // Since you're updating the data displayed in the invoices route, you want to clear
     // this cache and trigger a new request to the server.
@@ -56,19 +60,31 @@ export async function updateInvoice(id: string, formData: FormData) {
 
     const amountInCents = amount * 100;
 
-    await sql`
-        UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-        WHERE id = ${id}
-    `;
+    try {
+        await sql`
+            UPDATE invoices
+            SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+            WHERE id = ${id}
+        `;
+    } catch (err) {
+        return { message: "Database Error: Failed to Update Invoice." };
+    }
 
     revalidatePath("/dashboard/invoices");
+
+    /* redirect is being called outside of the try/catch block. This is because redirect
+    works by throwing an error, which would be caught by the catch block.To avoid this,
+    you can call redirect after try/catch. */
     redirect("/dashboard/invoices");
 }
 
 export async function deleteInvoice(id: string) {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    try {
+        await sql`DELETE FROM invoices WHERE id = ${id}`;
 
-    // Calling revalidatePath will trigger a new server request and re-render the table.
-    revalidatePath("/dashboard/invoices");
+        // Calling revalidatePath will trigger a new server request and re-render the table.
+        revalidatePath("/dashboard/invoices");
+    } catch (err) {
+        return { message: "Database Error: Failed to Delete Invoice" };
+    }
 }
