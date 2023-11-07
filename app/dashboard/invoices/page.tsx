@@ -1,7 +1,7 @@
-import Pagination from "@/app/ui/invoices/pagination";
+import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import Table from "@/app/ui/invoices/table";
-import { CreateInvoice } from "@/app/ui/invoices/buttons";
+import { CreateButton } from "@/app/ui/buttons";
 import { lusitana } from "@/app/ui/fonts";
 import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
 import { Suspense } from "react";
@@ -23,7 +23,10 @@ export default async function Page({
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
                 <Search placeholder="Search invoices..." />
-                <CreateInvoice />
+                <CreateButton
+                    href="/dashboard/invoices/create"
+                    text="Create Invoice"
+                />
             </div>
             <Suspense
                 key={query + currentPage}
