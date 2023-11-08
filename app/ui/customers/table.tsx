@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { CustomersTable } from "@/app/lib/definitions";
 import { fetchFilteredCustomers } from "@/app/lib/data";
+import { DeleteButton, UpdateButton } from "../buttons";
 
 export default async function CustomersTable({
     query,
@@ -125,6 +126,21 @@ export default async function CustomersTable({
                                         </td>
                                         <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                                             {customer.total_paid}
+                                        </td>
+                                        <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                                            <div className="flex justify-end gap-3">
+                                                <UpdateButton
+                                                    href={`/dashboard/customers/${customer.id}/edit`}
+                                                    sr-text="Update Invoice"
+                                                />
+                                                {/*<DeleteButton
+                                                    action={deleteInvoice.bind(
+                                                        null,
+                                                        invoice.id
+                                                    )}
+                                                    sr-text="Delete Invoice"
+                                                    />*/}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
