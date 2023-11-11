@@ -130,59 +130,6 @@ export async function deleteInvoice(id: string) {
     }
 }
 
-export type CustomerState = {
-    errors?: {
-        name?: string[];
-        email?: string[];
-    };
-    message?: string | null;
-};
-
-const CustomerSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1, { message: "This field has to be filled." }),
-    email: z.string().email({ message: "Please enter a valid email." }),
-});
-
-const UpdateCustomer = CustomerSchema.omit({ id: true });
-
-export async function updateCustomer(
-    id: string,
-    prevState: CustomerState,
-    formData: FormData
-) {
-    const validatedFields = UpdateCustomer.safeParse({
-        name: formData.get("name"),
-        email: formData.get("email"),
-    });
-
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: "Missing fields. Failed to update customer.",
-        };
-    }
-
-    const { name, email } = validatedFields.data;
-
-    try {
-        await sql`
-            UPDATE customers
-            SET name = ${name}, email = ${email}
-            WHERE id = ${id}
-        `;
-    } catch (err) {
-        return { message: "Database Error: Failed to Update Customer." };
-    }
-
-    revalidatePath("/dashboard/customers");
-
-    /* redirect is being called outside of the try/catch block. This is because redirect
-    works by throwing an error, which would be caught by the catch block. To avoid this,
-    you can call redirect after try/catch. */
-    redirect("/dashboard/customers");
-}
-
 export async function authenticate(
     prevState: string | undefined,
     formData: FormData

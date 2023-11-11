@@ -1,21 +1,19 @@
 "use client";
 
-import { Customer, InvoiceForm } from "@/app/lib/definitions";
+import { Customer } from "@/app/lib/definitions";
 import {
-    CheckIcon,
-    ClockIcon,
     CurrencyDollarIcon,
     UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
-import { updateCustomer } from "@/app/lib/actions";
+import { updateCustomer } from "@/app/lib/customer-actions";
 import { useFormState } from "react-dom";
 
 export default function EditCustomerForm({ customer }: { customer: Customer }) {
     const initialState = { message: null, errors: {} };
     // Passing an id as argument won't work
-    // <form action={updateInvoice(id)}></form>
+    // <form action={updateCustomer(id)}></form>
     // Instead, you can pass id to the Server Action using JS bind.
     const updateCustomerWithId = updateCustomer.bind(null, customer.id);
     const [state, dispatch] = useFormState(updateCustomerWithId, initialState);
