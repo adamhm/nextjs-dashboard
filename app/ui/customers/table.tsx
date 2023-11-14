@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { CustomersTable } from "@/app/lib/definitions";
-import { fetchFilteredCustomers } from "@/app/lib/data";
+import { fetchFilteredCustomers } from "@/app/lib/customers/data";
 import { DeleteButton, UpdateButton } from "../buttons";
 
 export default async function CustomersTable({

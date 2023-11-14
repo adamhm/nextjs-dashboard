@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
-import { updateCustomer } from "@/app/lib/customer-actions";
+import { updateCustomer } from "@/app/lib/customers/actions";
 import { useFormState } from "react-dom";
 
 export default function EditCustomerForm({ customer }: { customer: Customer }) {

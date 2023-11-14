@@ -4,7 +4,7 @@ import { lusitana } from "@/app/ui/fonts";
 import Search from "@/app/ui/search";
 import CustomersTable from "@/app/ui/customers/table";
 import Pagination from "@/app/ui/pagination";
-import { fetchCustomersPages } from "@/app/lib/data";
+import { fetchCustomersPages } from "@/app/lib/customers/data";
 import { CreateButton } from "@/app/ui/buttons";
 
 export default async function Page({
