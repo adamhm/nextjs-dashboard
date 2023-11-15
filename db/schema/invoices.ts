@@ -5,7 +5,7 @@ export const invoices = pgTable("invoices", {
     id: uuid("id")
         .default(sql`uuid_generate_v4()`)
         .primaryKey(),
-    customerId: uuid("customerId").notNull(),
+    customerId: uuid("customer_id").notNull(),
     amount: integer("amount").notNull(),
     status: varchar("status", { length: 255 }).notNull(),
     date: date("date").notNull(),
