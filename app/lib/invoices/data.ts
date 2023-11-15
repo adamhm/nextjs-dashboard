@@ -1,31 +1,41 @@
 import { sql } from "@vercel/postgres";
 import { unstable_noStore as noStore } from "next/cache";
 
-import { InvoiceForm, InvoicesTable, LatestInvoiceRaw } from "../definitions";
+import { db } from "@/db";
+import { invoices, customers } from "@/db/schema";
+import {
+    InvoiceForm,
+    InvoicesTable,
+    LatestInvoice,
+    LatestInvoiceRaw,
+} from "../definitions";
 import { formatCurrency } from "../utils";
+import { desc, eq } from "drizzle-orm";
 
 const ITEMS_PER_PAGE = 6;
 
 export async function fetchLatestInvoices() {
     noStore();
-    // Artificially delay a response for demo purposes.
-    // Don't do this in real life :)
-
-    // console.log("Fetching invoices data...");
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
-        const data = await sql<LatestInvoiceRaw>`
-        SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-        FROM invoices
-        JOIN customers ON invoices.customer_id = customers.id
-        ORDER BY invoices.date DESC
-        LIMIT 5`;
+        const data: LatestInvoiceRaw[] = await db
+            .select({
+                id: invoices.id,
+                amount: invoices.amount,
+                name: customers.name,
+                email: customers.email,
+                image_url: customers.image_url,
+            })
+            .from(invoices)
+            .innerJoin(customers, eq(invoices.customerId, customers.id))
+            .orderBy(desc(invoices.date))
+            .limit(5);
 
-        const latestInvoices = data.rows.map((invoice) => ({
+        const latestInvoices: LatestInvoice[] = data.map((invoice) => ({
             ...invoice,
             amount: formatCurrency(invoice.amount),
         }));
+
         return latestInvoices;
     } catch (error) {
         console.error("Database Error:", error);
