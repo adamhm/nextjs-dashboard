@@ -1,25 +1,15 @@
 "use server";
 
-import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 
-const InvoiceSchema = z.object({
-    id: z.string(),
-    customerId: z.string({
-        invalid_type_error: "Please select a customer.",
-    }),
-    amount: z.coerce
-        .number()
-        .gt(0, { message: "Please enter an amount greater than $0." }),
-    status: z.enum(["pending", "paid"], {
-        invalid_type_error: "Please select an invoice status.",
-    }),
-    date: z.string(),
-});
-
-const CreateInvoice = InvoiceSchema.omit({ id: true, date: true });
+import { db } from "@/db";
+import {
+    insertInvoiceSchema,
+    invoices,
+    updateInvoiceSchema,
+} from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 // This is temporary until @types/react-dom is updated
 export type State = {
@@ -31,9 +21,9 @@ export type State = {
     message?: string | null;
 };
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(_prevState: State, formData: FormData) {
     // Validate form fields using Zod
-    const validatedFields = CreateInvoice.safeParse({
+    const validatedFields = insertInvoiceSchema.safeParse({
         customerId: formData.get("customerId"),
         amount: formData.get("amount"),
         status: formData.get("status"),
@@ -59,10 +49,9 @@ export async function createInvoice(prevState: State, formData: FormData) {
 
     // insert the new invoice into the database
     try {
-        await sql`
-            INSERT INTO invoices (customer_id, amount, status, date)
-            VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-        `;
+        await db
+            .insert(invoices)
+            .values({ customerId, amount: amountInCents, status, date });
     } catch (err) {
         return { message: "Database Error: Failed to Create Invoice." };
     }
@@ -77,14 +66,13 @@ export async function createInvoice(prevState: State, formData: FormData) {
     redirect("/dashboard/invoices");
 }
 
-const UpdateInvoice = InvoiceSchema.omit({ date: true, id: true });
-
 export async function updateInvoice(
     id: string,
     prevState: State,
     formData: FormData
 ) {
-    const validatedFields = UpdateInvoice.safeParse({
+    const validatedFields = updateInvoiceSchema.safeParse({
+        id,
         customerId: formData.get("customerId"),
         amount: formData.get("amount"),
         status: formData.get("status"),
@@ -101,11 +89,10 @@ export async function updateInvoice(
     const amountInCents = amount * 100;
 
     try {
-        await sql`
-            UPDATE invoices
-            SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-            WHERE id = ${id}
-        `;
+        await db
+            .update(invoices)
+            .set({ customerId, amount: amountInCents, status })
+            .where(eq(invoices.id, id));
     } catch (err) {
         return { message: "Database Error: Failed to Update Invoice." };
     }
@@ -120,7 +107,8 @@ export async function updateInvoice(
 
 export async function deleteInvoice(id: string) {
     try {
-        await sql`DELETE FROM invoices WHERE id = ${id}`;
+        /* await sql`DELETE FROM invoices WHERE id = ${id}`; */
+        await db.delete(invoices).where(eq(invoices.id, id));
 
         // Calling revalidatePath will trigger a new server request and re-render the table.
         revalidatePath("/dashboard/invoices");

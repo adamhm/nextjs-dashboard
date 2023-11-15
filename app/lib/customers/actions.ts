@@ -1,9 +1,15 @@
 "use server";
 
-import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { eq } from "drizzle-orm";
+
+import { db } from "@/db";
+import {
+    customers,
+    insertCustomerSchema,
+    updateCustomerSchema,
+} from "@/db/schema";
 
 export type CustomerState = {
     errors?: {
@@ -14,24 +20,15 @@ export type CustomerState = {
     message?: string | null;
 };
 
-const CustomerSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1, { message: "This field has to be filled." }),
-    email: z.string().email({ message: "Please enter a valid email." }),
-    image_url: z.string({
-        invalid_type_error: "Please select a profile image",
-    }),
-});
-
 export async function createCustomer(
-    prevState: CustomerState,
+    _prevState: CustomerState,
     formData: FormData
 ) {
     // validating form data with Zod
-    const validatedFields = CustomerSchema.omit({ id: true }).safeParse({
+    const validatedFields = insertCustomerSchema.safeParse({
         name: formData.get("name"),
         email: formData.get("email"),
-        image_url: formData.get("image_url"),
+        imageUrl: formData.get("image_url"),
     });
 
     if (!validatedFields.success) {
@@ -41,14 +38,11 @@ export async function createCustomer(
         };
     }
 
-    const { name, email, image_url } = validatedFields.data;
+    const { name, email, imageUrl } = validatedFields.data;
 
     // insert the new customer into the database
     try {
-        await sql`
-            INSERT INTO customers (name, email, image_url)
-            VALUES (${name}, ${email}, ${image_url})
-        `;
+        await db.insert(customers).values({ name, email, imageUrl });
     } catch (err) {
         return { message: "Database Error: Failed to Create Customer." };
     }
@@ -58,14 +52,13 @@ export async function createCustomer(
     redirect("/dashboard/customers");
 }
 
-const UpdateCustomer = CustomerSchema.omit({ id: true });
-
 export async function updateCustomer(
     id: string,
-    prevState: CustomerState,
+    _prevState: CustomerState,
     formData: FormData
 ) {
-    const validatedFields = UpdateCustomer.safeParse({
+    const validatedFields = updateCustomerSchema.safeParse({
+        id,
         name: formData.get("name"),
         email: formData.get("email"),
     });
@@ -80,11 +73,10 @@ export async function updateCustomer(
     const { name, email } = validatedFields.data;
 
     try {
-        await sql`
-            UPDATE customers
-            SET name = ${name}, email = ${email}
-            WHERE id = ${id}
-        `;
+        await db
+            .update(customers)
+            .set({ name, email })
+            .where(eq(customers.id, id));
     } catch (err) {
         return { message: "Database Error: Failed to Update Customer." };
     }
