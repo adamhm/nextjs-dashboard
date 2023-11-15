@@ -24,7 +24,7 @@ export async function fetchLatestInvoices() {
                 amount: invoices.amount,
                 name: customers.name,
                 email: customers.email,
-                image_url: customers.image_url,
+                imageUrl: customers.imageUrl,
             })
             .from(invoices)
             .innerJoin(customers, eq(invoices.customerId, customers.id))

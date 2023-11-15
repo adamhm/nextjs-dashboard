@@ -29,7 +29,7 @@ export type Invoice = {
 export type LatestInvoice = {
     id: string;
     name: string;
-    image_url: string;
+    imageUrl: string;
     email: string;
     amount: string;
 };
