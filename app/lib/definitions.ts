@@ -81,3 +81,6 @@ export type InvoiceForm = {
     amount: number;
     status: "pending" | "paid";
 };
+
+export type SortColumn<T> = keyof T;
+export type SortDirection = "ASC" | "DESC";
