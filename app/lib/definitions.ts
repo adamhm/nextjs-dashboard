@@ -9,13 +9,6 @@ export type User = {
     password: string;
 };
 
-export type Customer = {
-    id: string;
-    name: string;
-    email: string;
-    image_url: string;
-};
-
 export type Invoice = {
     id: string;
     customer_id: string;
@@ -54,10 +47,10 @@ export type CustomersTable = {
     id: string;
     name: string;
     email: string;
-    image_url: string;
-    total_invoices: number;
-    total_pending: number;
-    total_paid: number;
+    imageUrl: string;
+    totalInvoices: number;
+    totalPending: number;
+    totalPaid: number;
 };
 
 export type FormattedCustomersTable = {
