@@ -68,7 +68,7 @@ export async function createInvoice(_prevState: State, formData: FormData) {
 
 export async function updateInvoice(
     id: string,
-    prevState: State,
+    _prevState: State,
     formData: FormData
 ) {
     const validatedFields = updateInvoiceSchema.safeParse({
