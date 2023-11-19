@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+
 import { CustomersTableSkeleton } from "@/app/ui/customers/skeletons";
 import { lusitana } from "@/app/ui/fonts";
 import Search from "@/app/ui/search";
@@ -10,7 +11,12 @@ import { CreateButton } from "@/app/ui/buttons";
 export default async function Page({
     searchParams,
 }: {
-    searchParams?: { query?: string; page?: string };
+    searchParams?: {
+        query?: string;
+        page?: string;
+        sortBy?: string;
+        sortDir?: string;
+    };
 }) {
     const query = searchParams?.query || "";
     const currentPage = Number(searchParams?.page) || 1;
@@ -32,7 +38,12 @@ export default async function Page({
                 key={query + currentPage}
                 fallback={<CustomersTableSkeleton />}
             >
-                <CustomersTable query={query} currentPage={currentPage} />
+                <CustomersTable
+                    query={query}
+                    currentPage={currentPage}
+                    sortBy={searchParams?.sortBy}
+                    sortDir={searchParams?.sortDir}
+                />
             </Suspense>
             <div className="mt-5 flex w-full justify-center">
                 <Pagination totalPages={totalPages} />

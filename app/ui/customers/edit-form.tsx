@@ -1,6 +1,6 @@
 "use client";
 
-import { Customer } from "@/app/lib/definitions";
+import { Customer } from "@/db/schema";
 import {
     CurrencyDollarIcon,
     UserCircleIcon,
