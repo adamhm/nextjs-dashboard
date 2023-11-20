@@ -47,15 +47,10 @@ export type CustomersTable = {
     totalPaid: number;
 };
 
-export type FormattedCustomersTable = {
-    id: string;
-    name: string;
-    email: string;
-    image_url: string;
-    total_invoices: number;
-    total_pending: string;
-    total_paid: string;
-};
+export type CustomersTableSortColumn = keyof Pick<
+    CustomersTable,
+    "name" | "email" | "totalInvoices" | "totalPending" | "totalPaid"
+>;
 
 export type CustomerField = {
     id: string;

@@ -1,5 +1,9 @@
 import Image from "next/image";
-import { CustomersTable } from "@/app/lib/definitions";
+import {
+    CustomersTable,
+    CustomersTableSortColumn,
+    SortDirection,
+} from "@/app/lib/definitions";
 import { fetchFilteredCustomers } from "@/app/lib/customers/data";
 import { UpdateButton } from "../buttons";
 
@@ -17,8 +21,8 @@ export default async function CustomersTable({
     const customers = await fetchFilteredCustomers(
         query,
         currentPage,
-        sortBy,
-        sortDir
+        sortBy as CustomersTableSortColumn,
+        sortDir as SortDirection
     );
 
     return (

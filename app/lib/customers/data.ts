@@ -1,13 +1,17 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { SQL, asc, desc, sql } from "drizzle-orm";
-import { PgColumn } from "drizzle-orm/pg-core";
+import { asc, desc, sql, eq, ilike, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { customers, invoices, type Customer } from "@/db/schema";
 
-import { CustomerField, CustomersTable } from "../definitions";
+import {
+    CustomerField,
+    CustomersTable,
+    CustomersTableSortColumn,
+    SortColumn,
+    SortDirection,
+} from "../definitions";
 import { formatCurrency } from "../utils";
-import { eq, ilike, or } from "drizzle-orm";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -58,14 +62,12 @@ export async function fetchCustomersPages(query: string) {
 export async function fetchFilteredCustomers(
     query: string,
     currentPage: number,
-    sortBy: string = "name",
-    sortDir: string = "ASC"
+    sortBy: CustomersTableSortColumn = "name",
+    sortDir: SortDirection = "ASC"
 ) {
     noStore();
 
-    type SortColumn = PgColumn | SQL<unknown>;
-
-    const sortColumns = new Map<string, SortColumn>([
+    const sortColumns = new Map<CustomersTableSortColumn, SortColumn>([
         ["name", customers.name],
         ["email", customers.email],
         ["totalInvoices", sql`totalInvoices`],
@@ -76,8 +78,7 @@ export async function fetchFilteredCustomers(
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
     const sortDirFn = (sortDir.toLowerCase() === "desc" ? desc : asc) || asc;
-
-    const sortColumn: SortColumn = sortColumns.get(sortBy) || customers.name;
+    const sortColumn = sortColumns.get(sortBy) || customers.name;
 
     try {
         const data: CustomersTable[] = await db
