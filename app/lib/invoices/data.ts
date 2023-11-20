@@ -1,16 +1,18 @@
-import { sql } from "@vercel/postgres";
 import { unstable_noStore as noStore } from "next/cache";
+import { sql, ilike, or, asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { invoices, customers } from "@/db/schema";
 import {
     InvoiceForm,
     InvoicesTable,
+    InvoicesTableSortColumn,
     LatestInvoice,
     LatestInvoiceRaw,
+    SortColumn,
+    SortDirection,
 } from "../definitions";
 import { formatCurrency } from "../utils";
-import { desc, eq } from "drizzle-orm";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -45,35 +47,53 @@ export async function fetchLatestInvoices() {
 
 export async function fetchFilteredInvoices(
     query: string,
-    currentPage: number
+    currentPage: number,
+    sortBy: InvoicesTableSortColumn = "date",
+    sortDir: SortDirection = "DESC"
 ) {
     noStore();
 
+    const sortColumns = new Map<InvoicesTableSortColumn, SortColumn>([
+        ["customer", customers.name],
+        ["name", customers.name],
+        ["email", customers.email],
+        ["amount", invoices.amount],
+        ["date", invoices.date],
+        ["status", invoices.status],
+    ]);
+
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    try {
-        const invoices = await sql<InvoicesTable>`
-            SELECT
-                invoices.id,
-                invoices.amount,
-                invoices.date,
-                invoices.status,
-                customers.name,
-                customers.email,
-                customers.image_url
-            FROM invoices
-            JOIN customers ON invoices.customer_id = customers.id
-            WHERE
-                customers.name ILIKE ${`%${query}%`} OR
-                customers.email ILIKE ${`%${query}%`} OR
-                invoices.amount::text ILIKE ${`%${query}%`} OR
-                invoices.date::text ILIKE ${`%${query}%`} OR
-                invoices.status ILIKE ${`%${query}%`}
-            ORDER BY invoices.date DESC
-            LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-        `;
+    const sortDirFn = (sortDir.toLowerCase() === "desc" ? desc : asc) || asc;
+    const sortColumn = sortColumns.get(sortBy) || invoices.date;
 
-        return invoices.rows;
+    try {
+        const result: InvoicesTable[] = await db
+            .select({
+                id: invoices.id,
+                amount: invoices.amount,
+                date: invoices.date,
+                status: sql<"pending" | "paid">`${invoices.status}`,
+                name: customers.name,
+                email: customers.email,
+                imageUrl: customers.imageUrl,
+            })
+            .from(invoices)
+            .innerJoin(customers, eq(invoices.customerId, customers.id))
+            .where(
+                or(
+                    ilike(customers.name, `%${query}%`),
+                    ilike(customers.email, `%${query}%`),
+                    sql`${invoices.amount}::text ILIKE ${`%${query}%`}`,
+                    sql`${invoices.date}::text ILIKE ${`%${query}%`}`,
+                    ilike(invoices.status, `%${query}%`)
+                )
+            )
+            .orderBy(sortDirFn(sortColumn))
+            .limit(ITEMS_PER_PAGE)
+            .offset(offset);
+
+        return result;
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch invoices.");
@@ -84,20 +104,25 @@ export async function fetchInvoicesPages(query: string) {
     noStore();
 
     try {
-        const count = await sql`SELECT COUNT(*)
-            FROM invoices
-            JOIN customers ON invoices.customer_id = customers.id
-            WHERE
-                customers.name ILIKE ${`%${query}%`} OR
-                customers.email ILIKE ${`%${query}%`} OR
-                invoices.amount::text ILIKE ${`%${query}%`} OR
-                invoices.date::text ILIKE ${`%${query}%`} OR
-                invoices.status ILIKE ${`%${query}%`}
-        `;
+        const count = (
+            await db
+                .select({
+                    count: sql<number>`cast(count(*) as int)`,
+                })
+                .from(invoices)
+                .innerJoin(customers, eq(invoices.customerId, customers.id))
+                .where(
+                    or(
+                        ilike(customers.name, `%${query}%`),
+                        ilike(customers.email, `%${query}%`),
+                        sql`${invoices.amount}::text ILIKE ${`%${query}%`}`,
+                        sql`${invoices.date}::text ILIKE ${`%${query}%`}`,
+                        sql`${invoices.status} ILIKE ${`%${query}%`}`
+                    )
+                )
+        )[0].count;
+        const totalPages = Math.ceil(count / ITEMS_PER_PAGE);
 
-        const totalPages = Math.ceil(
-            Number(count.rows[0].count) / ITEMS_PER_PAGE
-        );
         return totalPages;
     } catch (error) {
         console.error("Database Error:", error);
@@ -109,17 +134,17 @@ export async function fetchInvoiceById(id: string) {
     noStore();
 
     try {
-        const data = await sql<InvoiceForm>`
-            SELECT
-                invoices.id,
-                invoices.customer_id,
-                invoices.amount,
-                invoices.status
-            FROM invoices
-            WHERE invoices.id = ${id};
-    `;
+        const data: InvoiceForm[] = await db
+            .select({
+                id: invoices.id,
+                customerId: invoices.customerId,
+                amount: invoices.amount,
+                status: invoices.status,
+            })
+            .from(invoices)
+            .where(eq(invoices.id, id));
 
-        const invoice = data.rows.map((invoice) => ({
+        const invoice = data.map((invoice) => ({
             ...invoice,
             // Convert amount from cents to dollars
             amount: invoice.amount / 100,

@@ -10,7 +10,12 @@ import { fetchInvoicesPages } from "@/app/lib/invoices/data";
 export default async function Page({
     searchParams,
 }: {
-    searchParams?: { query?: string; page?: string };
+    searchParams?: {
+        query?: string;
+        page?: string;
+        sortBy?: string;
+        sortDir?: string;
+    };
 }) {
     const query = searchParams?.query || "";
     const currentPage = Number(searchParams?.page) || 1;
@@ -32,7 +37,12 @@ export default async function Page({
                 key={query + currentPage}
                 fallback={<InvoicesTableSkeleton />}
             >
-                <Table query={query} currentPage={currentPage} />
+                <Table
+                    query={query}
+                    currentPage={currentPage}
+                    sortBy={searchParams?.sortBy}
+                    sortDir={searchParams?.sortDir}
+                />
             </Suspense>
             <div className="mt-5 flex w-full justify-center">
                 <Pagination totalPages={totalPages} />
