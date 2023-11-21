@@ -6,6 +6,7 @@ import {
 } from "@/app/lib/definitions";
 import { fetchFilteredCustomers } from "@/app/lib/customers/data";
 import { UpdateButton } from "../buttons";
+import { CustomerSort } from "../sort";
 
 export default async function CustomersTable({
     query,
@@ -82,31 +83,46 @@ export default async function CustomersTable({
                                         scope="col"
                                         className="px-4 py-5 font-medium sm:pl-6"
                                     >
-                                        Name
+                                        <CustomerSort
+                                            title="Name"
+                                            sortBy="name"
+                                        />
                                     </th>
                                     <th
                                         scope="col"
                                         className="px-3 py-5 font-medium"
                                     >
-                                        Email
+                                        <CustomerSort
+                                            title="Email"
+                                            sortBy="email"
+                                        />
                                     </th>
                                     <th
                                         scope="col"
                                         className="px-3 py-5 font-medium"
                                     >
-                                        Total Invoices
+                                        <CustomerSort
+                                            title="Total Invoices"
+                                            sortBy="totalInvoices"
+                                        />
                                     </th>
                                     <th
                                         scope="col"
                                         className="px-3 py-5 font-medium"
                                     >
-                                        Total Pending
+                                        <CustomerSort
+                                            title="Total Pending"
+                                            sortBy="totalPending"
+                                        />
                                     </th>
                                     <th
                                         scope="col"
                                         className="px-4 py-5 font-medium"
                                     >
-                                        Total Paid
+                                        <CustomerSort
+                                            title="Total Paid"
+                                            sortBy="totalPaid"
+                                        />
                                     </th>
                                 </tr>
                             </thead>
