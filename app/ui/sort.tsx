@@ -3,18 +3,30 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
-    ChevronUpDownIcon,
-    ChevronUpIcon,
-    ChevronDownIcon,
-} from "@heroicons/react/24/outline";
-import { CustomersTableSortColumn, SortDirection } from "../lib/definitions";
+    ArrowDownAZIcon,
+    ArrowUpZAIcon,
+    ArrowDownUpIcon,
+    ArrowDown01Icon,
+    ArrowUp10Icon,
+} from "lucide-react";
+import {
+    CustomersTableSortColumn,
+    InvoicesTableSortColumn,
+    SortDirection,
+} from "../lib/definitions";
+import clsx from "clsx";
 
 type SortProps<TColumn> = {
     title: string;
-    sortBy: TColumn;
+    column: TColumn;
+    type?: "string" | "numeric";
 };
 
-export default function Sort<TColumn>({ title, sortBy }: SortProps<TColumn>) {
+export default function ColumnSort<TColumn>({
+    title,
+    column,
+    type = "string",
+}: SortProps<TColumn>) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const currentSortBy = searchParams.get("sortBy");
@@ -25,42 +37,87 @@ export default function Sort<TColumn>({ title, sortBy }: SortProps<TColumn>) {
     let pageURL: string;
     let sortDir: SortDirection;
 
-    if (sortBy === currentSortBy) {
+    if (column === currentSortBy) {
         sortDir = currentSortDir?.toLowerCase() === "desc" ? "ASC" : "DESC";
         params.set("sortDir", sortDir);
     } else {
         sortDir = "ASC";
-        params.set("sortBy", sortBy as string);
+        params.set("sortBy", column as string);
         params.set("sortDir", sortDir);
     }
 
     pageURL = `${pathname}?${params.toString()}`;
 
     const icon =
-        sortBy === currentSortBy ? (
-            sortDir === "ASC" ? (
-                <ChevronUpIcon className="ml-auto h-4 text-black font-bold" />
+        currentSortBy === column ? (
+            currentSortDir === "ASC" ? (
+                type === "string" ? (
+                    <ArrowDownAZIcon
+                        size={24}
+                        className="ml-auto h-5 font-bold"
+                    />
+                ) : (
+                    <ArrowDown01Icon
+                        size={24}
+                        className="ml-auto h-5 font-bold"
+                    />
+                )
+            ) : type === "string" ? (
+                <ArrowUpZAIcon size={24} className="ml-auto h-5 font-bold" />
             ) : (
-                <ChevronDownIcon className="ml-auto h-4 text-black font-bold" />
+                <ArrowUp10Icon size={24} className="ml-auto h-5 font-bold" />
             )
         ) : (
-            <ChevronUpDownIcon className="ml-auto h-6 text-black" />
+            <ArrowDownUpIcon className="ml-auto h-5 text-gray-500" />
         );
 
     return (
-        <Link href={pageURL} className="w-full flex items-center">
+        <Link
+            href={pageURL}
+            aria-label={`Order the table by ${title}`}
+            className={clsx("w-full flex items-center text-[16px]", {
+                "text-blue-600": currentSortBy === column,
+                "font-bold": currentSortBy === column,
+            })}
+        >
             {title}
             {icon}
         </Link>
     );
 }
 
-export const CustomerSort = ({
+export const CustomerColumnSort = ({
     title,
-    sortBy,
+    column,
+    type = "string",
 }: {
     title: string;
-    sortBy: CustomersTableSortColumn;
+    column: CustomersTableSortColumn;
+    type?: "string" | "numeric";
 }) => {
-    return <Sort<CustomersTableSortColumn> title={title} sortBy={sortBy} />;
+    return (
+        <ColumnSort<CustomersTableSortColumn>
+            title={title}
+            column={column}
+            type={type}
+        />
+    );
+};
+
+export const InvoiceColumnSort = ({
+    title,
+    column,
+    type = "string",
+}: {
+    title: string;
+    column: InvoicesTableSortColumn;
+    type?: "string" | "numeric";
+}) => {
+    return (
+        <ColumnSort<InvoicesTableSortColumn>
+            title={title}
+            column={column}
+            type={type}
+        />
+    );
 };

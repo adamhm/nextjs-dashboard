@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { UpdateButton, DeleteButton } from "@/app/ui/buttons";
 import InvoiceStatus from "@/app/ui/invoices/status";
+import { InvoiceColumnSort } from "../sort";
 import { formatDateToLocal, formatCurrency } from "@/app/lib/utils";
 import { fetchFilteredInvoices } from "@/app/lib/invoices/data";
 import { deleteInvoice } from "@/app/lib/invoices/actions";
@@ -87,31 +88,46 @@ export default async function InvoicesTable({
                                     scope="col"
                                     className="px-4 py-5 font-medium sm:pl-6"
                                 >
-                                    Customer
+                                    <InvoiceColumnSort
+                                        title="Customer"
+                                        column="customer"
+                                    />
                                 </th>
                                 <th
                                     scope="col"
                                     className="px-3 py-5 font-medium"
                                 >
-                                    Email
+                                    <InvoiceColumnSort
+                                        title="Email"
+                                        column="email"
+                                    />
                                 </th>
                                 <th
                                     scope="col"
                                     className="px-3 py-5 font-medium"
                                 >
-                                    Amount
+                                    <InvoiceColumnSort
+                                        title="Amount"
+                                        column="amount"
+                                    />
                                 </th>
                                 <th
                                     scope="col"
                                     className="px-3 py-5 font-medium"
                                 >
-                                    Date
+                                    <InvoiceColumnSort
+                                        title="Date"
+                                        column="date"
+                                    />
                                 </th>
                                 <th
                                     scope="col"
                                     className="px-3 py-5 font-medium"
                                 >
-                                    Status
+                                    <InvoiceColumnSort
+                                        title="Status"
+                                        column="status"
+                                    />
                                 </th>
                                 <th
                                     scope="col"
