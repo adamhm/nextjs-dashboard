@@ -6,7 +6,7 @@ import {
 } from "@/app/lib/definitions";
 import { fetchFilteredCustomers } from "@/app/lib/customers/data";
 import { UpdateButton } from "../buttons";
-import { CustomerSort } from "../sort";
+import { CustomerColumnSort } from "../sort";
 
 export default async function CustomersTable({
     query,
@@ -30,7 +30,7 @@ export default async function CustomersTable({
         <div className="mt-6 flow-root">
             <div className="overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
-                    <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
+                    <div className="overflow-hidden rounded-md bg-gray-50 md:pt-0 border">
                         <div className="md:hidden">
                             {customers?.map((customer) => (
                                 <div
@@ -77,52 +77,61 @@ export default async function CustomersTable({
                             ))}
                         </div>
                         <table className="hidden min-w-full rounded-md text-gray-900 md:table">
-                            <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+                            <thead className="rounded-md bg-gray-100 text-left text-sm font-normal border-b">
                                 <tr>
                                     <th
                                         scope="col"
                                         className="px-4 py-5 font-medium sm:pl-6"
                                     >
-                                        <CustomerSort
+                                        <CustomerColumnSort
                                             title="Name"
-                                            sortBy="name"
+                                            column="name"
                                         />
                                     </th>
                                     <th
                                         scope="col"
-                                        className="px-3 py-5 font-medium"
+                                        className="px-3 py-5 font-medium border-x"
                                     >
-                                        <CustomerSort
+                                        <CustomerColumnSort
                                             title="Email"
-                                            sortBy="email"
+                                            column="email"
                                         />
                                     </th>
                                     <th
                                         scope="col"
-                                        className="px-3 py-5 font-medium"
+                                        className="px-3 py-5 font-medium border-x"
                                     >
-                                        <CustomerSort
+                                        <CustomerColumnSort
                                             title="Total Invoices"
-                                            sortBy="totalInvoices"
+                                            column="totalInvoices"
+                                            type="numeric"
                                         />
                                     </th>
                                     <th
                                         scope="col"
-                                        className="px-3 py-5 font-medium"
+                                        className="px-3 py-5 font-medium border-x"
                                     >
-                                        <CustomerSort
+                                        <CustomerColumnSort
                                             title="Total Pending"
-                                            sortBy="totalPending"
+                                            column="totalPending"
+                                            type="numeric"
                                         />
                                     </th>
                                     <th
                                         scope="col"
-                                        className="px-4 py-5 font-medium"
+                                        className="px-4 py-5 font-medium border-x "
                                     >
-                                        <CustomerSort
+                                        <CustomerColumnSort
                                             title="Total Paid"
-                                            sortBy="totalPaid"
+                                            column="totalPaid"
+                                            type="numeric"
                                         />
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        className="relative py-3 pl-6 pr-3 bg-gray-100"
+                                    >
+                                        <span className="sr-only">Edit</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -130,7 +139,7 @@ export default async function CustomersTable({
                             <tbody className="divide-y divide-gray-200 text-gray-900">
                                 {customers.map((customer) => (
                                     <tr key={customer.id} className="group">
-                                        <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                        <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6 border-r">
                                             <div className="flex items-center gap-3">
                                                 <Image
                                                     src={customer.imageUrl}
@@ -142,19 +151,19 @@ export default async function CustomersTable({
                                                 <p>{customer.name}</p>
                                             </div>
                                         </td>
-                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm">
+                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm border-r">
                                             {customer.email}
                                         </td>
-                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm">
+                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm border-r">
                                             {customer.totalInvoices}
                                         </td>
-                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm">
+                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm border-r">
                                             {customer.totalPending}
                                         </td>
-                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
+                                        <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md border-r">
                                             {customer.totalPaid}
                                         </td>
-                                        <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                                        <td className="whitespace-nowrap w-1 py-3 pl-3 pr-3 bg-gray-100">
                                             <div className="flex justify-end gap-3">
                                                 <UpdateButton
                                                     href={`/dashboard/customers/${customer.id}/edit`}
