@@ -77,7 +77,7 @@ export default async function CustomersTable({
                             ))}
                         </div>
                         <table className="hidden min-w-full rounded-md text-gray-900 md:table">
-                            <thead className="rounded-md bg-gray-100 text-left text-sm font-normal border-b">
+                            <thead className="rounded-md bg-gray-50 text-left text-sm font-normal border-b">
                                 <tr>
                                     <th
                                         scope="col"
@@ -119,7 +119,7 @@ export default async function CustomersTable({
                                     </th>
                                     <th
                                         scope="col"
-                                        className="px-4 py-5 font-medium border-x "
+                                        className="px-4 py-5 font-medium border-x"
                                     >
                                         <CustomerColumnSort
                                             title="Total Paid"
